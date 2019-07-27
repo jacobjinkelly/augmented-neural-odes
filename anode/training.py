@@ -1,4 +1,6 @@
 import json
+import pickle
+
 import torch.nn as nn
 import torch
 from numpy import mean
@@ -53,7 +55,9 @@ class Trainer():
         self.histories = {'loss_history': [], 'nfe_history': [],
                           'bnfe_history': [], 'total_nfe_history': [],
                           'epoch_loss_history': [], 'epoch_nfe_history': [],
-                          'epoch_bnfe_history': [], 'epoch_total_nfe_history': []}
+                          'epoch_bnfe_history': [], 'epoch_total_nfe_history': [],
+                          'batch_nfe_history': [], 'sep_nfe_history': [],
+                          'batch_timestamps_history': [], 'sep_timestamps_history': []}
         self.buffer = {'loss': [], 'nfe': [], 'bnfe': [], 'total_nfe': []}
 
         # Only resnets have a number of layers attribute
@@ -119,6 +123,22 @@ class Trainer():
             if not self.is_resnet:
                 iteration_backward_nfes = self._get_and_reset_nfes()
                 epoch_backward_nfes += iteration_backward_nfes
+
+            # record NFE and timestamp history
+            self.histories["batch_nfe_history"].append(iteration_nfes)
+            self.histories["batch_timestamps_history"].append(iteration_timestamps)
+            self.histories["sep_nfe_history"].append(sep_iteration_nfes)
+            self.histories["sep_timestamps_history"].append(sep_iteration_timestamps)
+
+            with open("batch_nfe_history.pickle", "wb") as f:
+                pickle.dump(self.histories["batch_nfe_history"], f)
+            with open("batch_timestamps_history.pickle", "wb") as f:
+                pickle.dump(self.histories["batch_timestamps_history"], f)
+            with open("sep_nfe_history.pickle", "wb") as f:
+                pickle.dump(self.histories["sep_nfe_history"], f)
+            with open("sep_timestamps_history.pickle", "wb") as f:
+                pickle.dump(self.histories["sep_timestamps_history"], f)
+
 
             if i % self.print_freq == 0:
                 if self.verbose:
