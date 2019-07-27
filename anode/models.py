@@ -125,7 +125,7 @@ class ODEBlock(nn.Module):
         # Forward pass corresponds to solving ODE, so reset number of function
         # evaluations counter
         self.odefunc.nfe = 0
-        self.odefunc.time_stamps = []
+        self.odefunc.timestamps = []
 
         if eval_times is None:
             integration_time = torch.tensor([0, 1]).float().type_as(x)

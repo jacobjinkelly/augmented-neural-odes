@@ -107,7 +107,7 @@ class Trainer():
                 sep_iteration_nfes = [-1 for _ in range(batch_size)]
                 sep_iteration_timestamps = [[] for _ in range(batch_size)]
                 for batch_num in range(batch_size):
-                    x_batch_el = torch.unsqueeze(x_batch[i, ], 0)
+                    x_batch_el = torch.unsqueeze(x_batch[batch_num, ], 0)
 
                     self.model(x_batch_el)
 
@@ -210,8 +210,7 @@ class Trainer():
         return iteration_nfes
 
     def _get_and_reset_timestamps(self):
-        """
-        Returns and resets the timestamps for function evaluations for model."""
+        """Returns and resets the timestamps for function evaluations for model."""
         if hasattr(self.model, 'odeblock'):  # If we are using ODENet
            iteration_timestamps = self.model.odeblock.odefunc.timestamps
            self.model.odeblock.odefunc.timestamps = []
