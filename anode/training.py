@@ -55,15 +55,13 @@ class Trainer():
         self.histories = {'loss_history': [], 'nfe_history': [],
                           'bnfe_history': [], 'total_nfe_history': [],
                           'epoch_loss_history': [], 'epoch_nfe_history': [],
-                          'epoch_bnfe_history': [], 'epoch_total_nfe_history': [],
-                          'batch_nfe_history': [], 'sep_nfe_history': [],
-                          'batch_timestamps_history': [], 'sep_timestamps_history': []}
+                          'epoch_bnfe_history': [], 'epoch_total_nfe_history': []}
         self.buffer = {'loss': [], 'nfe': [], 'bnfe': [], 'total_nfe': []}
 
         # Only resnets have a number of layers attribute
         self.is_resnet = hasattr(self.model, 'num_layers')
 
-    def train(self, data_loader, num_epochs):
+    def train(self, data_loader, num_epochs, epoch_num):
         """Trains model on data in data_loader for num_epochs.
 
         Parameters
@@ -73,11 +71,11 @@ class Trainer():
         num_epochs : int
         """
         for epoch in range(num_epochs):
-            avg_loss = self._train_epoch(data_loader)
+            avg_loss = self._train_epoch(data_loader, epoch_num)
             if self.verbose:
                 print("Epoch {}: {:.3f}".format(epoch + 1, avg_loss))
 
-    def _train_epoch(self, data_loader):
+    def _train_epoch(self, data_loader, epoch_num):
         """Trains model for an epoch.
 
         Parameters
@@ -124,21 +122,15 @@ class Trainer():
                 iteration_backward_nfes = self._get_and_reset_nfes()
                 epoch_backward_nfes += iteration_backward_nfes
 
-            # record NFE and timestamp history
-            self.histories["batch_nfe_history"].append(iteration_nfes)
-            self.histories["batch_timestamps_history"].append(iteration_timestamps)
-            self.histories["sep_nfe_history"].append(sep_iteration_nfes)
-            self.histories["sep_timestamps_history"].append(sep_iteration_timestamps)
-
             dir, _ = self.save_dir
-            with open("{}/batch_nfe_history.pickle".format(dir), "wb") as f:
-                pickle.dump(self.histories["batch_nfe_history"], f)
-            with open("{}/batch_timestamps_history.pickle".format(dir), "wb") as f:
-                pickle.dump(self.histories["batch_timestamps_history"], f)
-            with open("{}/sep_nfe_history.pickle".format(dir), "wb") as f:
-                pickle.dump(self.histories["sep_nfe_history"], f)
-            with open("{}/sep_timestamps_history.pickle".format(dir), "wb") as f:
-                pickle.dump(self.histories["sep_timestamps_history"], f)
+            with open("{}/epoch{}_itr{}_batch_nfe_history.pickle".format(dir, epoch_num, i), "wb") as f:
+                pickle.dump(iteration_nfes, f)
+            with open("{}/epoch{}_itr{}_batch_timestamps_history.pickle".format(dir, epoch_num, i), "wb") as f:
+                pickle.dump(iteration_timestamps, f)
+            with open("{}/epoch{}_itr{}_sep_nfe_history.pickle".format(dir, epoch_num, i), "wb") as f:
+                pickle.dump(sep_iteration_nfes, f)
+            with open("{}/epoch{}_itr{}_sep_timestamps_history.pickle".format(dir, epoch_num, i), "wb") as f:
+                pickle.dump(sep_iteration_timestamps, f)
 
 
             if i % self.print_freq == 0:

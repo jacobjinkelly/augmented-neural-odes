@@ -139,7 +139,7 @@ def run_and_save_experiments_img(device, path_to_config):
             for epoch in range(training_config["epochs"]):
                 print("\nEpoch {}".format(epoch + 1))
                 try:
-                    trainer.train(data_loader, 1)
+                    trainer.train(data_loader, 1, epoch)
                     end_training = False
                 except AssertionError as e:
                     only_success = False
