@@ -1,5 +1,6 @@
 import json
 import torch.nn as nn
+import torch
 from numpy import mean
 
 
@@ -94,6 +95,18 @@ class Trainer():
             if not self.is_resnet:
                 iteration_nfes = self._get_and_reset_nfes()
                 epoch_nfes += iteration_nfes
+
+            # run each example in the batch separately
+            with torch.no_grad():
+                batch_size = x_batch.shape[0]
+                sep_iteration_nfes = [-1 for _ in range(batch_size)]
+                for batch_num in range(batch_size):
+                    x_batch_el = torch.unsqueeze(x_batch[i, ], 0)
+
+                    self.model(x_batch_el)
+
+                    if not self.is_resnet:
+                        sep_iteration_nfes[batch_num] = self._get_and_reset_nfes()
 
             loss = self.loss_func(y_pred, y_batch)
             loss.backward()
