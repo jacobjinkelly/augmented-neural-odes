@@ -50,6 +50,7 @@ class ConvODEFunc(nn.Module):
         self.img_size = img_size
         self.time_dependent = time_dependent
         self.nfe = 0  # Number of function evaluations
+        self.timestamps = []  # Timestamps of function evaluations
         self.channels, self.height, self.width = img_size
         self.channels += augment_dim
         self.num_filters = num_filters
@@ -85,6 +86,7 @@ class ConvODEFunc(nn.Module):
             Shape (batch_size, input_dim)
         """
         self.nfe += 1
+        self.timestamps.append(t)
         if self.time_dependent:
             out = self.conv1(t, x)
             out = self.non_linearity(out)

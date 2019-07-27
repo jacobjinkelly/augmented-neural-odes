@@ -94,12 +94,14 @@ class Trainer():
             # ResNets do not have an NFE attribute
             if not self.is_resnet:
                 iteration_nfes = self._get_and_reset_nfes()
+                iteration_timestamps = self._get_and_reset_timestamps()
                 epoch_nfes += iteration_nfes
 
             # run each example in the batch separately
             with torch.no_grad():
                 batch_size = x_batch.shape[0]
                 sep_iteration_nfes = [-1 for _ in range(batch_size)]
+                sep_iteration_timestamps = [[] for _ in range(batch_size)]
                 for batch_num in range(batch_size):
                     x_batch_el = torch.unsqueeze(x_batch[i, ], 0)
 
@@ -107,6 +109,7 @@ class Trainer():
 
                     if not self.is_resnet:
                         sep_iteration_nfes[batch_num] = self._get_and_reset_nfes()
+                        sep_iteration_timestamps[batch_num] = self._get_and_reset_timestamps()
 
             loss = self.loss_func(y_pred, y_batch)
             loss.backward()
@@ -184,3 +187,14 @@ class Trainer():
             iteration_nfes = self.model.odefunc.nfe
             self.model.odefunc.nfe = 0
         return iteration_nfes
+
+    def _get_and_reset_timestamps(self):
+        """
+        Returns and resets the timestamps for function evaluations for model."""
+        if hasattr(self.model, 'odeblock'):  # If we are using ODENet
+           iteration_timestamps = self.model.odeblock.odefunc.timestamps
+           self.model.odeblock.odefunc.timestamps = []
+        else:
+            iteration_timestamps = self.model.odefunc.timestamps
+            self.model.odefunc.timestamps = []
+        return iteration_timestamps
