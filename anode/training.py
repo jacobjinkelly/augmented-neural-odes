@@ -130,13 +130,14 @@ class Trainer():
             self.histories["sep_nfe_history"].append(sep_iteration_nfes)
             self.histories["sep_timestamps_history"].append(sep_iteration_timestamps)
 
-            with open("batch_nfe_history.pickle", "wb") as f:
+            dir, _ = self.save_dir
+            with open("{}/batch_nfe_history.pickle".format(dir), "wb") as f:
                 pickle.dump(self.histories["batch_nfe_history"], f)
-            with open("batch_timestamps_history.pickle", "wb") as f:
+            with open("{}/batch_timestamps_history.pickle".format(dir), "wb") as f:
                 pickle.dump(self.histories["batch_timestamps_history"], f)
-            with open("sep_nfe_history.pickle", "wb") as f:
+            with open("{}/sep_nfe_history.pickle".format(dir), "wb") as f:
                 pickle.dump(self.histories["sep_nfe_history"], f)
-            with open("sep_timestamps_history.pickle", "wb") as f:
+            with open("{}/sep_timestamps_history.pickle".format(dir), "wb") as f:
                 pickle.dump(self.histories["sep_timestamps_history"], f)
 
 
