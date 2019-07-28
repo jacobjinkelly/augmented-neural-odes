@@ -86,7 +86,7 @@ class ConvODEFunc(nn.Module):
             Shape (batch_size, input_dim)
         """
         self.nfe += 1
-        self.timestamps.append(t)
+        self.timestamps.append(t.item())
         if self.time_dependent:
             out = self.conv1(t, x)
             out = self.non_linearity(out)
