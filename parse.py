@@ -27,6 +27,8 @@ for epoch in epochs:
         with open("{}/epoch{}_itr{}_sep_timestamps_history.pickle".format(dir, epoch, itr), "rb") as f:
             sep_timestamps_history = pickle.load(f)
 
+        batch_timestamps_history.sort()
+
         # sort timestamps lexicographically
         for i in range(len(sep_timestamps_history)):
             sep_timestamps_history[i].sort()
@@ -34,20 +36,28 @@ for epoch in epochs:
         sep_timestamps_history.sort(key=len)
 
         sep_timestamps_history = np.array(sep_timestamps_history)
-        sep_timestamps_history_y = []
+        timestamps_history_y = []
+
         colours = []
         COLOUR_SCALE = 1
+
+        batch_timestamps_history = np.array(batch_timestamps_history)
+        timestamps_history_y.append(np.repeat(-10, batch_timestamps_history.shape[0]))
+        colours.extend([batch_timestamps_history.shape[0] / COLOUR_SCALE
+                        for _ in range(batch_timestamps_history.shape[0])])
+
         for i in range(len(sep_timestamps_history)):
             sep_timestamps_history[i] = np.array(sep_timestamps_history[i])
-            sep_timestamps_history_y.append(np.repeat(i, sep_timestamps_history[i].shape[0]))
+            timestamps_history_y.append(np.repeat(i, sep_timestamps_history[i].shape[0]))
             colours.extend([sep_timestamps_history[i].shape[0] / COLOUR_SCALE
                             for _ in range(sep_timestamps_history[i].shape[0])])
-        sep_timestamps_history_y = np.array(sep_timestamps_history_y)
+        timestamps_history_y = np.array(timestamps_history_y)
 
         sep_timestamps_history = np.hstack(sep_timestamps_history.flat)
-        sep_timestamps_history_y = np.hstack(sep_timestamps_history_y.flat)
+        sep_timestamps_history = np.append(batch_timestamps_history, sep_timestamps_history)
+        timestamps_history_y = np.hstack(timestamps_history_y.flat)
 
-        plt.scatter(sep_timestamps_history, sep_timestamps_history_y,
+        plt.scatter(sep_timestamps_history, timestamps_history_y,
                     s=1,
                     c=colours,
                     cmap=get_cmap("viridis"))
@@ -59,6 +69,7 @@ for epoch in epochs:
         plt.savefig("{}/epoch{:02d}_itr{:03d}_scatter.png".format(dir,  epoch, itr))
         plt.clf()
 
+        # aggregate data for histogram
         all_data.extend(sep_nfe_history)
 
     plt.hist(all_data)
