@@ -78,3 +78,17 @@ for epoch in epochs:
     plt.title("epoch{:02d}".format(epoch))
     plt.savefig("{}/epoch{:02d}_hist.png".format(dir, epoch))
     plt.clf()
+
+for epoch in range(20):
+    diffs = []
+    for itr in range(num_itrs):
+        with open("{}/epoch{}_itr{}_batch_nfe_history.pickle".format(dir, epoch, itr), "rb") as f:
+            batch_nfe_history = pickle.load(f)
+
+        with open("{}/epoch{}_itr{}_sep_nfe_history.pickle".format(dir, epoch, itr), "rb") as f:
+            sep_nfe_history = pickle.load(f)
+        # compare batch NFEs to mean for all batch examples
+        diff = batch_nfe_history - np.mean(sep_nfe_history)
+        diffs.append(diff)
+
+    print("Epoch: {:02d} Mean Diff: {:02.2f}".format(epoch, np.mean(diffs)))
