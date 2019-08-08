@@ -51,6 +51,7 @@ class ConvODEFunc(nn.Module):
         self.time_dependent = time_dependent
         self.nfe = 0  # Number of function evaluations
         self.timestamps = []  # Timestamps of function evaluations
+        self.reject = [] # Step was rejected or accepted, along with step size and time
         self.channels, self.height, self.width = img_size
         self.channels += augment_dim
         self.num_filters = num_filters

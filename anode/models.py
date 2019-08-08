@@ -126,6 +126,7 @@ class ODEBlock(nn.Module):
         # evaluations counter
         self.odefunc.nfe = 0
         self.odefunc.timestamps = []
+        self.odefunc.reject = []
 
         if eval_times is None:
             integration_time = torch.tensor([0, 1]).float().type_as(x)

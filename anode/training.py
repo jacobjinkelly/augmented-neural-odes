@@ -97,6 +97,7 @@ class Trainer():
             if not self.is_resnet:
                 iteration_nfes = self._get_and_reset_nfes()
                 iteration_timestamps = self._get_and_reset_timestamps()
+                iteration_rejects = self._get_and_reset_rejects()
                 epoch_nfes += iteration_nfes
 
             # run each example in the batch separately
@@ -104,6 +105,7 @@ class Trainer():
                 batch_size = x_batch.shape[0]
                 sep_iteration_nfes = [-1 for _ in range(batch_size)]
                 sep_iteration_timestamps = [[] for _ in range(batch_size)]
+                sep_iteration_rejects = [[] for _ in range(batch_size)]
                 for batch_num in range(batch_size):
                     x_batch_el = torch.unsqueeze(x_batch[batch_num, ], 0)
 
@@ -112,6 +114,7 @@ class Trainer():
                     if not self.is_resnet:
                         sep_iteration_nfes[batch_num] = self._get_and_reset_nfes()
                         sep_iteration_timestamps[batch_num] = self._get_and_reset_timestamps()
+                        sep_iteration_rejects[batch_num] = self._get_and_reset_rejects()
 
             loss = self.loss_func(y_pred, y_batch)
             loss.backward()
@@ -127,10 +130,14 @@ class Trainer():
                 pickle.dump(iteration_nfes, f)
             with open("{}/epoch{}_itr{}_batch_timestamps_history.pickle".format(dir, epoch_num, i), "wb") as f:
                 pickle.dump(iteration_timestamps, f)
+            with open("{}/epoch{}_itr{}_batch_rejects_history.pickle".format(dir, epoch_num, i), "wb") as f:
+                pickle.dump(iteration_rejects, f)
             with open("{}/epoch{}_itr{}_sep_nfe_history.pickle".format(dir, epoch_num, i), "wb") as f:
                 pickle.dump(sep_iteration_nfes, f)
             with open("{}/epoch{}_itr{}_sep_timestamps_history.pickle".format(dir, epoch_num, i), "wb") as f:
                 pickle.dump(sep_iteration_timestamps, f)
+            with open("{}/epoch{}_itr{}_sep_rejects_history.pickle".format(dir, epoch_num, i), "wb") as f:
+                pickle.dump(sep_iteration_rejects, f)
 
 
             if i % self.print_freq == 0:
@@ -210,3 +217,13 @@ class Trainer():
             iteration_timestamps = self.model.odefunc.timestamps
             self.model.odefunc.timestamps = []
         return iteration_timestamps
+
+    def _get_and_reset_rejects(self):
+        """Returns and resets the rejects for steps of solver for model."""
+        if hasattr(self.model, 'odeblock'):  # If we are using ODENet
+           iteration_rejects = self.model.odeblock.odefunc.reject
+           self.model.odeblock.odefunc.reject = []
+        else:
+            iteration_rejects = self.model.odefunc.reject
+            self.model.odefunc.reject = []
+        return iteration_rejects
